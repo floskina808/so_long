@@ -5,7 +5,7 @@ OBJDIR := obj
 
 SRCS := src/main.c src/map.c src/validate.c src/path_check.c src/game.c src/render.c src/input.c src/error.c
 
-LIBFT_SRCS := lib/libft/ft_strlen.c lib/libft/ft_strdup.c lib/libft/ft_strjoin.c lib/libft/ft_strchr.c lib/libft/ft_strncmp.c lib/libft/ft_calloc.c lib/libft/ft_bzero.c lib/libft/ft_memset.c lib/libft/ft_memcpy.c lib/libft/ft_split.c lib/libft/ft_putstr_fd.c lib/libft/ft_putendl_fd.c lib/libft/ft_putnbr_fd.c
+LIBFT_SRCS :=  lib/libft/ft_strlen.c lib/libft/ft_strdup.c lib/libft/ft_strjoin.c lib/libft/ft_strchr.c lib/libft/ft_strncmp.c lib/libft/ft_calloc.c lib/libft/ft_bzero.c lib/libft/ft_memset.c lib/libft/ft_memcpy.c lib/libft/ft_split.c lib/libft/ft_putstr_fd.c lib/libft/ft_putendl_fd.c lib/libft/ft_putnbr_fd.c
 
 PRINTF_SRCS := lib/ft_printf/ft_printf.c
 
