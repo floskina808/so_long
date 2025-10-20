@@ -6,7 +6,7 @@
 /*   By: faiello <faiello@student.42roma.it>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 23:32:04 by faiello           #+#    #+#             */
-/*   Updated: 2025/10/16 23:32:06 by faiello          ###   ########.fr       */
+/*   Updated: 2025/10/17 16:02:28 by faiello          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,69 +14,84 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+static bool	initialize_resources(t_map *map, t_player **queue, int **visited,
+		int *max)
+{
+	*max = map->width * map->height;
+	*queue = (t_player *)ft_calloc(*max, sizeof(t_player));
+	if (!*queue)
+		return (false);
+	*visited = (int *)ft_calloc(*max, sizeof(int));
+	if (!*visited)
+	{
+		free(*queue);
+		return (false);
+	}
+	return (true);
+}
+
+static void	flood_fill(t_map *map, int *visited, int x, int y)
+{
+	if (x < 0 || x >= map->width)
+		return ;
+	if (y < 0 || y >= map->height)
+		return ;
+	if (map->map[y][x] == '1')
+		return ;
+	if (visited[y * map->width + x])
+		return ;
+	visited[y * map->width + x] = 1;
+	flood_fill(map, visited, x + 1, y);
+	flood_fill(map, visited, x - 1, y);
+	flood_fill(map, visited, x, y + 1);
+	flood_fill(map, visited, x, y - 1);
+}
+
+static void	fill_visited_recursive(t_map *map, int *visited)
+{
+	int	x;
+	int	y;
+
+	x = map->player.x;
+	y = map->player.y;
+	flood_fill(map, visited, x, y);
+}
+
+static bool	scan_unreachable_items(t_map *map, int *visited)
+{
+	int	y;
+	int	x;
+
+	y = 0;
+	while (y < map->height)
+	{
+		x = 0;
+		while (x < map->width)
+		{
+			if ((map->map[y][x] == 'C' || map->map[y][x] == 'E') && !visited[y
+				* map->width + x])
+				return (false);
+			x++;
+		}
+		y++;
+	}
+	return (true);
+}
+
 bool	check_map_path(t_map *map)
 {
 	int			max;
 	t_player	*queue;
-	int			front;
-	int			back;
 	int			*visited;
-	int			dirs[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-	t_player	player;
-	t_player	current;
-	int			nx;
-	int			ny;
-	bool		all_reachable;
+	bool		ok;
 
-	max = map->width * map->height;
-	front = 0;
-	back = 0;
 	if (!map || !map->map)
 		return (false);
-	player.x = map->player.x;
-	player.y = map->player.y;
-	queue = (t_player *)ft_calloc(max, sizeof(t_player));
-	if (!queue)
+	if (!initialize_resources(map, &queue, &visited, &max))
 		return (false);
-	visited = (int *)ft_calloc(max, sizeof(int));
-	if (!visited)
-	{
-		free(queue);
-		return (false);
-	}
-	queue[back++] = player;
-	visited[player.y * map->width + player.x] = 1;
-	while (front < back)
-	{
-		current = queue[front++];
-		for (int i = 0; i < 4; i++)
-		{
-			nx = current.x + dirs[i][0];
-			ny = current.y + dirs[i][1];
-			if (nx < 0 || nx >= map->width || ny < 0 || ny >= map->height)
-				continue ;
-			if (map->map[ny][nx] == '1')
-				continue ;
-			if (visited[ny * map->width + nx])
-				continue ;
-			visited[ny * map->width + nx] = 1;
-			queue[back++] = (t_player){nx, ny};
-		}
-	}
-	all_reachable = true;
-	for (int y = 0; y < map->height && all_reachable; y++)
-	{
-		for (int x = 0; x < map->width; x++)
-		{
-			if ((map->map[y][x] == 'C' || map->map[y][x] == 'E') && !visited[y
-				* map->width + x])
-			{
-				all_reachable = false;
-				break ;
-			}
-		}
-	}
+	fill_visited_recursive(map, visited);
+	ok = scan_unreachable_items(map, visited);
 	free(queue);
 	free(visited);
-	return (all_reachable);
+	return (ok);
 }

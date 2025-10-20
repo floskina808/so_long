@@ -1,70 +1,99 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: faiello <faiello@student.42roma.it>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/17 16:13:14 by faiello           #+#    #+#             */
+/*   Updated: 2025/10/17 16:25:16 by faiello          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 #include <fcntl.h>
 
-static char	**append_row(char **rows, int height, char *line)
+static bool	append_row_or_fail(t_map *map, char *line)
 {
 	char	**tmp;
 	int		i;
 
-	tmp = (char **)ft_calloc(height + 2, sizeof(char *));
+	tmp = (char **)ft_calloc(map->height + 2, sizeof(char *));
 	if (!tmp)
-		return (NULL);
-	i = 0;
-	while (i < height)
 	{
-		tmp[i] = rows[i];
+		free(line);
+		free_map(map);
+		return (false);
+	}
+	i = 0;
+	while (i < map->height)
+	{
+		tmp[i] = map->map[i];
 		i++;
 	}
-	tmp[height] = line;
-	free(rows);
-	return (tmp);
+	tmp[map->height] = line;
+	free(map->map);
+	map->map = tmp;
+	map->height++;
+	return (true);
+}
+
+static bool	process_line(t_map *map, char *line)
+{
+	size_t	len;
+
+	len = ft_strlen(line);
+	if (len > 0 && line[len - 1] == '\n')
+	{
+		line[len - 1] = '\0';
+		len = len - 1;
+	}
+	if (len == 0)
+	{
+		free(line);
+		return (false);
+	}
+	if (map->height == 0)
+		map->width = (int)len;
+	else if ((int)len != map->width)
+	{
+		free(line);
+		return (false);
+	}
+	if (!append_row_or_fail(map, line))
+		return (false);
+	return (true);
+}
+
+static bool	process_file(int fd, t_map *map)
+{
+	char	*line;
+
+	line = get_next_line(fd);
+	while ((line))
+	{
+		if (!process_line(map, line))
+		{
+			free_map(map);
+			close(fd);
+			return (false);
+		}
+		line = get_next_line(fd);
+	}
+	close(fd);
+	return (true);
 }
 
 bool	load_map(const char *path, t_map *map)
 {
 	int		fd;
-	char	*line;
-	size_t	len;
 
 	ft_bzero(map, sizeof(t_map));
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
 		return (false);
-	while ((line = get_next_line(fd)))
-	{
-		len = ft_strlen(line);
-		if (len > 0 && line[len - 1] == '\n')
-		{
-			line[len - 1] = '\0';
-			len--;
-		}
-		if (len == 0)
-		{
-			free(line);
-			free_map(map);
-			close(fd);
-			return (false);
-		}
-		if (map->height == 0)
-			map->width = (int)len;
-		else if ((int)len != map->width)
-		{
-			free(line);
-			free_map(map);
-			close(fd);
-			return (false);
-		}
-		map->map = append_row(map->map, map->height, line);
-		if (!map->map)
-		{
-			free(line);
-			free_map(map);
-			close(fd);
-			return (false);
-		}
-		map->height++;
-	}
-	close(fd);
+	if (!process_file(fd, map))
+		return (false);
 	if (map->height == 0 || map->width == 0)
 	{
 		free_map(map);

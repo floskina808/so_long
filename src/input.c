@@ -1,5 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   input.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: faiello <faiello@student.42roma.it>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/17 15:56:53 by faiello           #+#    #+#             */
+/*   Updated: 2025/10/17 16:08:43 by faiello          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 #include <stdio.h>
+
+static void	finalize_move(t_game *game, int nx, int ny, char tile)
+{
+	if (tile == 'C')
+	{
+		game->map.map[ny][nx] = '0';
+		game->collected++;
+		if (game->collected == game->map.collectibles)
+			game->exit_is_open = true;
+	}
+	game->map.player.x = nx;
+	game->map.player.y = ny;
+	game->moves++;
+	ft_printf("Moves: %d\n", game->moves);
+}
 
 static void	try_move(t_game *game, int dx, int dy)
 {
@@ -26,17 +53,7 @@ static void	try_move(t_game *game, int dx, int dy)
 		}
 		return ;
 	}
-	if (tile == 'C')
-	{
-		game->map.map[ny][nx] = '0';
-		game->collected++;
-		if (game->collected == game->map.collectibles)
-			game->exit_is_open = true;
-	}
-	game->map.player.x = nx;
-	game->map.player.y = ny;
-	game->moves++;
-	ft_printf("Moves: %d\n", game->moves);
+	finalize_move(game, nx, ny, tile);
 }
 
 int	handle_key(int keycode, t_game *game)

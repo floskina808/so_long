@@ -51,4 +51,7 @@ fclean: clean
 
 re: fclean all
 
+norminette:
+	norminette $(SRCS) include/ lib/libft/ lib/ft_printf/ lib/get_next_line/
+
 .PHONY: all clean fclean re

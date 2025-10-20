@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   game.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: faiello <faiello@student.42roma.it>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/17 15:56:49 by faiello           #+#    #+#             */
+/*   Updated: 2025/10/17 16:04:44 by faiello          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 
 #define PATH_WALL "assets/wall.xpm"
@@ -86,9 +98,7 @@ void	destroy_game(t_game *game)
 			mlx_destroy_window(game->mlx, game->win);
 			game->win = NULL;
 		}
-#ifdef __linux__
 		mlx_destroy_display(game->mlx);
-#endif
 		free(game->mlx);
 		game->mlx = NULL;
 	}
